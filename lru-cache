@@ -1,0 +1,99 @@
+class HashItem:
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.next = None
+        self.prev = None
+
+class HashTable:
+    def __init__(self):
+        self.h_table_size = 10000
+        self.cache_size = 5
+        self.cache_count = 0
+        self.slot = [None for i in range(self.h_table_size)]
+        self.head = HashItem(888,888)
+        self.tail = HashItem(999,999)
+        self.head.next = self.tail
+        self.tail.prev = self.head
+    
+    def _hash(self, key):
+        return key<<5 % self.h_table_size
+    
+    def remove_cache_end(self):
+        remove_node = self.tail.prev
+        h = self._hash(remove_node.key)
+        self.slot[h] = None
+        new_last = self.tail.prev.prev
+        new_last.next = self.tail
+        self.tail.prev = new_last
+        self.cache_count -= 1
+
+    def promote_node(self, pnode):
+        before_node = pnode.prev
+        if before_node is self.head:
+            return
+        after_node = pnode.next
+        before_node.next = after_node
+        after_node.prev = before_node
+        after_start = self.head.next
+        after_start.prev = pnode
+        pnode.next = after_start
+        self.head.next = pnode
+
+    def put(self, key, value):
+        if self.cache_count == self.cache_size:
+            self.remove_cache_end()
+        
+        h = self._hash(key)
+        if self.slot[h] is None:
+            if self.head.next is self.tail:
+                new_node = HashItem(key, value)
+                self.head.next = new_node
+                new_node.prev = self.head
+                self.tail.prev = new_node
+                new_node.next = self.tail
+                self.slot[h] = new_node
+                print('type: ', type(self.slot[h]))
+                self.cache_count += 1
+            else:
+                after_head = self.head.next
+                new_node = HashItem(key, value)
+                new_node.next = after_head
+                new_node.prev = self.head
+                after_head.prev = new_node
+                self.head.next = new_node
+                self.slot[h] = new_node
+                self.cache_count += 1
+        else:
+            self.slot[h].value = value
+
+    def get(self, key):
+        h = self._hash(key)
+        if self.slot[h] is None:
+            print('-1')
+            return -1
+        else:
+            self.promote_node(self.slot[h])
+            return self.slot[h].value
+
+    def print_forward(self):
+        curr_node = self.head.next
+        while curr_node.next is not None:
+            print(curr_node.value, end=' ')
+            curr_node = curr_node.next
+        print()
+
+ht = HashTable()
+ht.put(1,1)
+ht.put(2,2)
+ht.put(3,3)
+ht.put(4,4)
+ht.put(5,5)
+ht.put(6,6)
+ht.print_forward()
+
+ht.get(3)
+
+ht.print_forward()
+
+
