@@ -1,0 +1,52 @@
+class HashItem:
+        def __init__(self, key,value):
+                self.key = key
+                self.value = value
+
+class HashTable:
+        def __init__(self):
+                self.size = 10000
+                self.slots = [None for i in range(self.size)]
+                self.count = 0
+
+        def _hash(self, key):
+                return key << 5 % self.size
+
+        def put(self, key, value):
+                new_item = HashItem(key, value)
+                h = self._hash(key)
+                if self.slots[h] is None:
+                        self.slots[h] = new_item
+                        self.count += 1
+                        #check for match, and if so, update key
+                else:
+                        while self.slots[h] is not None:
+                                h += 1
+                        self.slots[h] = new_item
+                        self.count += 1
+
+        def get(self, key):
+                h = self._hash(key)
+                if self.slots[h].key == key:
+                        return self.slots[h].key, self.slots[h].value
+                else:
+                        while self.slots[h] is not None:
+                                h += 1
+                                if self.slots[h].key == key:
+                                        return self.slots.key, self.slots[h].value
+
+        def remove(self, key):
+                h = self._hash(key)
+                if self.slots[h].key == key:
+                        self.slots[h] = 'Removed'
+                else:
+                        while self.slots[h] is not None:
+                                h += 1
+                                if self.slots[h].key == key:
+                                        self.slots[h] = 'Removed'
+
+ht = HashTable()
+ht.put(5, 25)
+print(ht.get(5))
+ht.remove(5)
+
